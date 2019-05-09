@@ -21,9 +21,10 @@ NUM_SAMPLES=2000
 channels=1
 sampwidth=2
 TIME=2
-recordFile = 'audio_record/temp'
+recordFile = 'audio_record/'
 
-time_span = 3.0
+time_span = 5.0
+time_span_2 = 600.0
 ini_time = time.time()
 start_time = time.time()
 k = ini_time
@@ -34,7 +35,7 @@ finalText=""
 emotion="none"
 currentTone="none"
 
-final_output_path = 'emotion_output.txt'
+final_output_path = 'web/data/emotion_output.txt'
 file = open(final_output_path, "w") 
 file.close()
 class EmotionGeter:
@@ -133,7 +134,7 @@ def record_save_detection():
         if k-start_time >= time_span:
             print('.')
             #my_buf.append(string_audio_data)
-            save_wave_file(recordFile+str(filename_add)+'.wav',my_buf) #save wave file as the "temp.wav"
+            save_wave_file(recordFile+'record.wav',my_buf) #save wave file as the "temp.wav"
             my_buf =[]
             getText()
             eg=EmotionGeter()
@@ -141,12 +142,12 @@ def record_save_detection():
             global currentTone
             emotion=eg.getEmotion(finalText)
             print(emotion)
-            with open(final_output_path,"a") as f:
-                f.write(str(emotion)+ '\n')
+            with open(final_output_path,"w") as f:
+                f.write(str(emotion))
             #f.close()
             start_time = time.time()
             filename_add+=1
-        if k-ini_time >= 30.0:
+        if k-ini_time >= time_span_2:
             break
     stream.close()
     # global filename_add
@@ -191,7 +192,7 @@ def speechToText():
     global currentStatus
     currentStatus="I'm thinking..."
     callback = MyRecognizeCallback()
-    with open(recordFile+str(filename_add)+'.wav', 'rb') as audio_file:
+    with open(recordFile+'record.wav', 'rb') as audio_file:
         content = speech_to_text.recognize_with_websocket(
             audio=audio_file,
             content_type='audio/l16;rate=16000',
@@ -203,8 +204,8 @@ def getText():
     global currentStatus
     currentStatus = "I'm thinking..."
     text=""
-    with open(recordFile+str(filename_add)+'.wav', 'rb') as audio_file:
-        content = speech_to_text.recognize('en-US_NarrowbandModel',
+    with open(recordFile+'record.wav', 'rb') as audio_file:
+        content = speech_to_text.recognize('en-US_NarrowbandModel', #zh-CN_NarrowbandModel
                                                audio=audio_file,
                                                content_type='audio/wav',
                                                word_confidence=True,
